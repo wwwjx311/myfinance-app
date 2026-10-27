@@ -1,1 +1,363 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Finance</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --forest:#0A3323;--sage:#839958;--cream:#F7F4D5;
+  --rose:#D3968C;--teal:#105666;--white:#fff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--forest);
+  font-family:"Inter Tight",Arial,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer;border:0}
+.app{max-width:520px;margin:auto;min-height:100vh;padding-bottom:110px}
+.hero{background:var(--forest);color:white;padding:25px 20px;
+  border-radius:0 0 25px 25px}
+.brand{font-size:25px;font-weight:800;color:var(--cream)}
+.subtitle{color:#c5d5c6;font-size:13px;margin:14px 0}
+.card{background:white;border-radius:18px;padding:19px;margin:13px 15px;
+  box-shadow:0 3px 12px #0a33230b}
+.hero .card{margin:18px 0 0;color:var(--forest)}
+.label{font-size:13px;color:#68796b}
+.big{font-size:31px;font-weight:800;margin:10px 0}
+h2{font-size:22px;margin:22px 18px 12px}
+h3{margin:0 0 14px;font-size:17px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.small{font-size:12px;color:#748475}
+.progress{height:11px;background:#e6ecd9;border-radius:20px;overflow:hidden;margin:12px 0}
+.fill{height:100%;background:var(--sage);width:0}
+.item{display:flex;justify-content:space-between;align-items:center;
+  padding:12px 0;border-bottom:1px solid #edf0e7}
+.item:last-child{border-bottom:0}
+.item strong{font-size:14px}
+.item span{font-size:13px}
+.pill{padding:7px 12px;border-radius:20px;background:#e5ecdb;color:var(--forest)}
+.btn{padding:12px 16px;border-radius:12px;background:var(--teal);color:white;font-weight:600}
+.btn-light{background:#e7eddc;color:var(--forest)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 15px}
+.grid .card{margin:0}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+ width:min(100%,520px);display:flex;background:white;
+ border-top:1px solid #e4e9db;padding:12px 5px 16px;z-index:10}
+nav button{flex:1;background:none;color:#7b8b7b;font-size:12px;padding:7px 0}
+nav button.active{color:var(--forest);font-weight:800;background:#e9efdf;border-radius:12px}
+.fab{position:fixed;bottom:86px;right:max(18px,calc((100vw - 520px)/2 + 18px));
+ background:var(--teal);color:white;border-radius:40px;
+ padding:14px 19px;font-weight:700;box-shadow:0 5px 20px #0003;z-index:12}
+.page{display:none}
+.page.active{display:block}
+.pagehead{padding:22px 20px 4px;font-size:26px;font-weight:800}
+.overlay{position:fixed;inset:0;background:#0008;display:none;
+ align-items:flex-end;justify-content:center;z-index:30}
+.overlay.show{display:flex}
+.sheet{width:min(100%,520px);background:var(--cream);padding:24px;
+ border-radius:25px 25px 0 0;max-height:90vh;overflow:auto}
+input,select{width:100%;padding:13px;border:1px solid #cbd7c4;
+ border-radius:11px;background:white;margin:6px 0 14px}
+.formlabel{font-size:13px;font-weight:600}
+.status{background:#e6ecdb;color:var(--forest);padding:7px 11px;border-radius:20px;font-size:12px}
+.paid{background:#dcead8}
+.warning{background:#f5d9d4}
+</style>
+</head>
+<body>
+<div class="app">
+
+<section id="home" class="page active">
+ <div class="hero">
+  <div class="row">
+   <div class="brand">◉ myfinance.</div>
+   <button class="pill" onclick="toggleBalance()">◉ Hide</button>
+  </div>
+  <div class="subtitle">Your money, made simple · October 2026</div>
+  <div class="card">
+   <div class="label">Total expenses this month</div>
+   <div class="big balance" id="total">RM 6,070.00</div>
+   <div class="row small">
+    <span>Daily <b id="dailySmall">RM 3,000</b></span>
+    <span>Grocery <b id="grocerySmall">RM 620</b></span>
+    <span>Fixed <b>RM 2,450</b></span>
+   </div>
+  </div>
+ </div>
+
+ <div class="card">
+  <div class="row"><h3>Daily spending alert</h3><span class="status" id="percent">50%</span></div>
+  <div class="big balance" id="dailyTotal">RM 3,000.00</div>
+  <div class="progress"><div class="fill" id="spendingBar"></div></div>
+  <div class="small" id="alertText">70% salary alert at RM 4,200</div>
+ </div>
+
+ <div class="card">
+  <div class="row"><h3>Upcoming payments</h3><button class="pill" onclick="go('payments')">View all</button></div>
+  <div id="upcoming"></div>
+ </div>
+
+ <div class="grid">
+  <div class="card" onclick="go('groceries')" style="background:#dfe8d0;cursor:pointer">
+   <div class="label">Groceries</div>
+   <h3 id="groceryHome">RM 620</h3>
+   <div class="small">View tracker →</div>
+  </div>
+  <div class="card" onclick="go('more')" style="background:#dce9e9;cursor:pointer">
+   <div class="label">Investments</div>
+   <h3>RM 128,500</h3>
+   <div class="small">View portfolio →</div>
+  </div>
+ </div>
+</section>
+
+<section id="expenses" class="page">
+ <div class="pagehead">Expenses</div>
+ <div class="card">
+  <div class="label">Daily expenses this month</div>
+  <div class="big balance" id="expenseTotal"></div>
+  <div class="small">Monthly budget: RM 3,800</div>
+  <div class="progress"><div class="fill" id="expenseBar"></div></div>
+ </div>
+ <div class="card"><h3>Recent transactions</h3><div id="transactionList"></div></div>
+</section>
+
+<section id="groceries" class="page">
+ <div class="pagehead">Groceries</div>
+ <div class="card">
+  <div class="row"><h3>Monthly budget</h3><button class="pill" onclick="editBudget()">Edit</button></div>
+  <div class="big balance" id="groceryBudget">RM 800.00</div>
+  <div class="row small"><span id="grocerySpent"></span><span id="groceryPct"></span></div>
+  <div class="progress"><div class="fill" id="groceryBar"></div></div>
+  <div class="small" id="groceryRemaining"></div>
+ </div>
+ <div class="card">
+  <div class="row"><h3>Grocery expense tracker</h3><button class="pill" onclick="openForm('grocery')">+ Add trip</button></div>
+  <div id="groceryList"></div>
+ </div>
+ <div class="card">
+  <h3>Shopping list</h3>
+  <div id="shoppingList"></div>
+  <input id="shoppingInput" placeholder="Add grocery item">
+  <button class="btn" onclick="addShopping()">Add item</button>
+ </div>
+</section>
+
+<section id="payments" class="page">
+ <div class="pagehead">Payments</div>
+ <div class="card">
+  <div class="label">Unpaid commitments</div>
+  <div class="big balance" id="unpaidTotal"></div>
+  <div class="small">Tap a payment to update its status</div>
+ </div>
+ <div class="card"><h3>October payment checklist</h3><div id="paymentList"></div></div>
+</section>
+
+<section id="more" class="page">
+ <div class="pagehead">More</div>
+ <div class="card"><h3>Savings & Investments</h3><div id="investments"></div></div>
+ <div class="card">
+  <h3>Savings goals</h3>
+  <div class="item"><span>Travel</span><strong>RM 4,000 / 12,000</strong></div>
+  <div class="item"><span>Future Home</span><strong>RM 18,000 / 90,000</strong></div>
+  <div class="item"><span>Emergency Fund</span><strong>RM 6,500 / 18,000</strong></div>
+ </div>
+ <div class="card"><h3>Family & Settings</h3><p class="small">Personal and household finance management. Demo mode only.</p></div>
+</section>
+
+<button class="fab" onclick="openForm('expense')">＋ Expense</button>
+
+<nav>
+ <button class="active" data-page="home" onclick="go('home')">⌂<br>Home</button>
+ <button data-page="expenses" onclick="go('expenses')">▤<br>Expenses</button>
+ <button data-page="groceries" onclick="go('groceries')">▧<br>Groceries</button>
+ <button data-page="payments" onclick="go('payments')">▣<br>Payments</button>
+ <button data-page="more" onclick="go('more')">☷<br>More</button>
+</nav>
+</div>
+
+<div class="overlay" id="overlay">
+ <div class="sheet">
+  <div class="row"><h2 id="formTitle">Add expense</h2><button class="pill" onclick="closeForm()">✕</button></div>
+  <form id="entryForm">
+   <div class="formlabel">Amount (RM)</div>
+   <input id="amount" type="number" min="0.01" step="0.01" required placeholder="0.00">
+   <div class="formlabel" id="merchantLabel">Merchant</div>
+   <input id="merchant" required placeholder="e.g. Grab">
+   <div id="categoryWrap">
+    <div class="formlabel">Category</div>
+    <select id="category">
+     <option>Food & Drinks</option><option>Transport</option>
+     <option>Petrol</option><option>Shopping</option>
+     <option>Entertainment</option><option>Medical</option>
+     <option>Miscellaneous</option>
+    </select>
+   </div>
+   <div class="formlabel">Payment account / method</div>
+   <select id="account">
+    <option>TNG Wallet</option>
+    <option>Maybank Amex Credit Card</option>
+    <option>Maybank Mastercard Credit Card</option>
+    <option>UOB Credit Card</option>
+    <option>Debit Card</option>
+    <option>Online Transfer</option>
+    <option>Cash</option>
+   </select>
+   <div class="formlabel">Date</div>
+   <input id="date" type="date" required value="2026-10-27">
+   <div class="formlabel">Notes (optional)</div>
+   <input id="notes" placeholder="Add a description">
+   <button class="btn" type="submit" style="width:100%">Save demo entry</button>
+  </form>
+ </div>
+</div>
+
+<script>
+const money=n=>"RM "+Number(n).toLocaleString("en-MY",{
+ minimumFractionDigits:2,maximumFractionDigits:2
+});
+const state={
+ salary:6000,baseDaily:3000,groceryBudget:800,
+ transactions:[
+  {name:"Grab Ride",amount:28,category:"Transport",account:"TNG Wallet",date:"2026-10-26"},
+  {name:"Coffee Bean",amount:22,category:"Food & Drinks",account:"Maybank Amex Credit Card",date:"2026-10-25"},
+  {name:"Petronas",amount:100,category:"Petrol",account:"Maybank Mastercard Credit Card",date:"2026-10-24"},
+  {name:"Uniqlo",amount:150,category:"Shopping",account:"UOB Credit Card",date:"2026-10-22"}
+ ],
+ groceries:[
+  {name:"Lotus's",amount:250,date:"2026-10-20"},
+  {name:"AEON",amount:220,date:"2026-10-14"},
+  {name:"99 Speedmart",amount:150,date:"2026-10-06"}
+ ],
+ shopping:[{name:"Eggs",done:false},{name:"Milk",done:true},
+           {name:"Rice",done:false},{name:"Vegetables",done:false}],
+ payments:[
+  {name:"House Rent",amount:1200,due:"1 Oct",paid:true},
+  {name:"Car Loan",amount:850,due:"5 Oct",paid:true},
+  {name:"Phone Bill",amount:100,due:"28 Oct",paid:false},
+  {name:"Insurance",amount:300,due:"31 Oct",paid:false},
+  {name:"Maybank Card Statement",amount:650,due:"30 Oct",paid:false}
+ ],
+ investments:[
+  ["ASNB",35000],["SSPN",8500],["Public Mutual",22000],
+  ["Principal",13000],["EPF / KWSP",40000],["Stocks / ETFs",10000]
+ ]
+};
+let formType="expense",hidden=false;
+const el=id=>document.getElementById(id);
+const daily=()=>state.baseDaily+
+ state.transactions.slice(4).reduce((s,t)=>s+t.amount,0);
+const grocery=()=>state.groceries.reduce((s,t)=>s+t.amount,0);
+const total=()=>daily()+grocery()+2450;
+function text(id,value){el(id).textContent=value}
+function display(n){return hidden?"RM •••••":money(n)}
+function go(page){
+ document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"));
+ el(page).classList.add("active");
+ document.querySelectorAll("nav button").forEach(x=>
+ x.classList.toggle("active",x.dataset.page===page));
+ window.scrollTo(0,0);
+}
+function toggleBalance(){hidden=!hidden;render()}
+function row(name,detail,amount){
+ const d=document.createElement("div");d.className="item";
+ const left=document.createElement("div");
+ const a=document.createElement("strong");a.textContent=name;
+ const b=document.createElement("div");b.className="small";b.textContent=detail;
+ left.append(a,b);
+ const right=document.createElement("strong");right.textContent=display(amount);
+ d.append(left,right);return d;
+}
+function fillList(id,items){
+ const box=el(id);box.replaceChildren(...items);
+}
+function render(){
+ const d=daily(),g=grocery(),ratio=d/state.salary*100;
+ text("total",display(total()));
+ text("dailySmall",hidden?"••••":money(d));
+ text("grocerySmall",hidden?"••••":money(g));
+ text("dailyTotal",display(d));
+ text("expenseTotal",display(d));
+ text("percent",ratio.toFixed(1)+"%");
+ el("percent").className="status "+(ratio>=70?"warning":"paid");
+ el("spendingBar").style.width=Math.min(100,ratio)+"%";
+ el("spendingBar").style.background=ratio>=70?"#D3968C":"#839958";
+ el("expenseBar").style.width=Math.min(100,d/3800*100)+"%";
+ text("alertText",ratio>=70?"70% spending alert reached":
+ money(4200-d)+" before your spending alert");
+ text("groceryHome",display(g));
+ text("groceryBudget",display(state.groceryBudget));
+ text("grocerySpent","Spent: "+display(g));
+ text("groceryPct",(g/state.groceryBudget*100).toFixed(0)+"%");
+ text("groceryRemaining",g>state.groceryBudget?
+ money(g-state.groceryBudget)+" over budget":
+ money(state.groceryBudget-g)+" remaining");
+ el("groceryBar").style.width=Math.min(100,g/state.groceryBudget*100)+"%";
+ el("groceryBar").style.background=g>state.groceryBudget?"#D3968C":"#839958";
+ fillList("transactionList",state.transactions.slice().reverse().map(t=>
+ row(t.name,t.category+" · "+t.account, t.amount)));
+ fillList("groceryList",state.groceries.slice().reverse().map(t=>
+ row(t.name,t.date,t.amount)));
+ const unpaid=state.payments.filter(p=>!p.paid);
+ text("unpaidTotal",display(unpaid.reduce((s,p)=>s+p.amount,0)));
+ fillList("upcoming",unpaid.slice(0,3).map(p=>row(p.name,"Due "+p.due,p.amount)));
+ const payBox=el("paymentList");payBox.replaceChildren();
+ state.payments.forEach((p,i)=>{
+  const r=document.createElement("div");r.className="item";
+  const label=document.createElement("span");
+  label.textContent=p.name+" · "+money(p.amount);
+  const btn=document.createElement("button");
+  btn.className="status "+(p.paid?"paid":"");
+  btn.textContent=p.paid?"Paid":"Unpaid";
+  btn.onclick=()=>{state.payments[i].paid=!p.paid;render()};
+  r.append(label,btn);payBox.append(r);
+ });
+ const shop=el("shoppingList");shop.replaceChildren();
+ state.shopping.forEach((s,i)=>{
+  const label=document.createElement("label");
+  label.style.display="block";label.style.margin="12px 0";
+  const check=document.createElement("input");
+  check.type="checkbox";check.checked=s.done;
+  check.style.width="auto";check.style.marginRight="12px";
+  check.onchange=()=>{state.shopping[i].done=check.checked};
+  label.append(check,document.createTextNode(s.name));shop.append(label);
+ });
+ fillList("investments",state.investments.map(x=>row(x[0],"Manual valuation",x[1])));
+}
+function openForm(type){
+ formType=type;el("overlay").classList.add("show");
+ text("formTitle",type==="grocery"?"Add grocery trip":"Add daily expense");
+ text("merchantLabel",type==="grocery"?"Supermarket":"Merchant");
+ el("categoryWrap").style.display=type==="grocery"?"none":"block";
+}
+function closeForm(){el("overlay").classList.remove("show")}
+el("entryForm").addEventListener("submit",e=>{
+ e.preventDefault();
+ const amount=Number(el("amount").value);
+ const name=el("merchant").value.trim();
+ if(!name||!Number.isFinite(amount)||amount<=0)return;
+ const record={name,amount,date:el("date").value};
+ if(formType==="grocery")state.groceries.push(record);
+ else state.transactions.push({...record,
+  category:el("category").value,account:el("account").value});
+ e.target.reset();el("date").value="2026-10-27";
+ closeForm();render();go(formType==="grocery"?"groceries":"expenses");
+});
+function addShopping(){
+ const input=el("shoppingInput"),name=input.value.trim();
+ if(!name)return;
+ state.shopping.push({name,done:false});input.value="";render();
+}
+function editBudget(){
+ const v=prompt("Monthly grocery budget (RM)",state.groceryBudget);
+ if(v===null)return;
+ const n=Number(v);
+ if(Number.isFinite(n)&&n>0){state.groceryBudget=n;render()}
+}
+render();
+</script>
+</body>
+</html>
+
